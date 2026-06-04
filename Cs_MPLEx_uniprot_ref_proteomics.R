@@ -25,7 +25,7 @@ library(stringr)
 library(ggplot2)
 
 ###playing with peptide data and rolling up the intensities to protein level.
-setwd("C:/Users/dawa726/OneDrive - PNNL/Desktop/BRAVE_PD/Cs_MPLEx_peptides/Cs_MPLEx_UniProt_reference/cs_Mplex_MBR_5/")
+setwd("./cs_Mplex_MBR_5/")
 mod_pep <- read_tsv("combined_modified_peptide.tsv") %>%
   setNames(., gsub(" Intensity", "", names(.))) %>%
   setNames(., gsub(" ", ".", names(.)))
