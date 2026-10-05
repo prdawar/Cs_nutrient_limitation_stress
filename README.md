@@ -3,6 +3,4 @@ This repository is for hosting the scripts and files to reproduce the analyses d
 
 ## Graphical abstract
 
-![Graphical abstract of the MPLEx proteomics and metabolomics study](images/graphical_abstract_crmicr.png)
-
 [Download the original TIFF](images/graphical_abstract_crmicr.tif)
