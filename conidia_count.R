@@ -28,14 +28,36 @@ conidia_summary <- conidia_count_long %>%
     sd_n = sd(conidia_count),
     .groups = "drop")
 
-t.test(conidia_count ~ condition,
-       data = filter(conidia_count_long, condition %in% c("PDA", "Half-PDA")))
-
-t.test(conidia_count ~ condition,
-       data = filter(conidia_count_long, condition %in% c("PDA", "OneTenth-PDA")))
-
-t.test(conidia_count ~ condition,
-       data = filter(conidia_count_long, condition %in% c("Half-PDA", "OneTenth-PDA")))
+# Two-sided Welch tests with Holm correction across all three comparisons.
+comparison_columns <- list(
+  c("full.strength.PDA", "half.strength.PDA"),
+  c("full.strength.PDA", "one.tenth.strength.PDA"),
+  c("half.strength.PDA", "one.tenth.strength.PDA")
+)
+comparison_labels <- c("Full vs half-strength PDA",
+                       "Full vs one-tenth-strength PDA",
+                       "Half vs one-tenth-strength PDA")
+conidia_tests <- do.call(rbind, lapply(seq_along(comparison_columns), function(i) {
+  pair <- comparison_columns[[i]]
+  x <- conidia_count[[pair[1]]]
+  y <- conidia_count[[pair[2]]]
+  test <- t.test(x, y, paired = FALSE, var.equal = FALSE,
+                 alternative = "two.sided")
+  data.frame(
+    Comparison = comparison_labels[i],
+    n_group1 = sum(is.finite(x)),
+    n_group2 = sum(is.finite(y)),
+    mean_group1 = mean(x, na.rm = TRUE),
+    mean_group2 = mean(y, na.rm = TRUE),
+    t = unname(test$statistic),
+    df = unname(test$parameter),
+    p_unadjusted = test$p.value
+  )
+}))
+conidia_tests$p_Holm <- p.adjust(conidia_tests$p_unadjusted, method = "holm")
+conidia_tests$significant_Holm <- conidia_tests$p_Holm < 0.05
+print(conidia_tests, digits = 7, row.names = FALSE)
+write.csv(conidia_tests, "conidia_Welch_Holm_results.csv", row.names = FALSE)
 
 ggplot(conidia_summary, aes(x = condition, y = mean_n)) +
   geom_bar(stat = "identity", width = 0.65, fill = "#4682B4") +
